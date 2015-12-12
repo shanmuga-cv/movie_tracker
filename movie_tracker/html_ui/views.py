@@ -20,7 +20,7 @@ def get_render_dict(request):
 @view_config(route_name='movie_list')
 def list_movies(request):
     render_dict = get_render_dict(request)
-    movies = session.query(Movie).limit(100).all()
+    movies = session.query(Movie).all()
     print(len(movies))
     total_movies = session.query(Movie).count()
     render_dict['movie_count'] = total_movies
