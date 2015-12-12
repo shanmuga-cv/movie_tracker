@@ -20,13 +20,11 @@ class Movie(Base):
     movie_file_size_mb = Column(Integer)
     subtitle_file = Column(String)
     status = Column(String)
-    users = relationship("MovieViewings", backref="views") #TODO Learn this syntax
 
 class MovieWatchers(Base):
     __tablename__ = "movie_watchers"
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String)
-    movies_watched = relationship("MovieViewings", backref="movies") #TODO Learn this syntax
 
 class MovieViewings(Base):
     __tablename__ = "movie_viewings"
@@ -35,8 +33,8 @@ class MovieViewings(Base):
     movie_id = Column(Integer, ForeignKey("movies.movie_id")) #TODO set ondelete
     rating = Column(Integer)
     watched_at = Column(DateTime)  #TODO set default at now
-    user = relationship("MovieWatchers", backref="watcher")
-    movie = relationship("Movie", backref="movie")
+    user = relationship("MovieWatchers", backref="movies_watched")
+    movie = relationship("Movie", backref="watched_by")
 
 
 class ConnectionManager:
