@@ -54,7 +54,7 @@ def listUsers(request):
 @view_config(route_name="select_user")
 def select_user(request):
     user_id = request.matchdict['user_id']
-    response = Response(status=302, location="/home")
+    response = Response(status=302, location="/")
     response.set_cookie('user_id', user_id)
     return response
 
@@ -83,3 +83,9 @@ def mark_watched(request):
     session.commit()
     response = Response(status=302, location="/movies")
     return response
+
+@view_config(route_name="home")
+def home(request):
+    render_dict = get_render_dict(request)
+    template_html = render('templates/home.jinja2', render_dict)
+    return Response(template_html)
