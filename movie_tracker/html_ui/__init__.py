@@ -13,5 +13,6 @@ def main():
     config.add_route('user_list', '/users')
     config.add_route('select_user', '/user/select/{user_id}')
     config.add_route('icon', '/favicon.ico')
+    config.add_route('mark_watched', '/watched/{user_id}/{movie_id}/{rating}')
     config.scan()
     return config.make_wsgi_app()

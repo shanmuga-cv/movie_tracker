@@ -1,5 +1,9 @@
 {% extends "base.jinja2" %}
 {% block body %}
+{% if current_user %}
+Rating (0-10) <input type=number id=rating min=0 max=10 step=any value="{{previous_rating}}" >  </input> </input> <input type=button value="mark watched" onclick="submit_viewing()">
+<br><br>
+{% endif %}
 <table border=1>
     <tr> <th> id </th> <td> {{ movie.movie_id}} </td> </tr>
     <tr> <th> name </th> <td> <input type="text" value="{{ movie.movie_name}}"> </text> </td> </tr>
@@ -7,3 +11,12 @@
     <tr> <th> file </th> <td> {{ movie.movie_file}} </td> </tr>
 </table>
 {% endblock %}
+
+{% if current_user %}
+{% block javascript %}
+function submit_viewing() {
+    rating = document.getElementById("rating").value;
+    window.location = '/watched/{{ current_user.user_id }}/{{movie.movie_id}}/'+rating;
+}
+{% endblock %}
+{% endif %}
