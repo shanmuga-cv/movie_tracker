@@ -1,4 +1,9 @@
 {% extends "base.jinja2" %}
 {% block body %}
-I dont care about movie with id {{movie_id}}
+<table border=1>
+    <tr> <th> id </th> <td> {{ movie.movie_id}} </td> </tr>
+    <tr> <th> name </th> <td> <input type="text" value="{{ movie.movie_name}}"> </text> </td> </tr>
+    <tr> <th> size (MB) </th> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> </tr>
+    <tr> <th> file </th> <td> {{ movie.movie_file}} </td> </tr>
+</table>
 {% endblock %}

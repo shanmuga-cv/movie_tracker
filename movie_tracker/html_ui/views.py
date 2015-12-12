@@ -19,8 +19,8 @@ def my_view(request):
 
 @view_config(route_name="movie_details")#, renderer="templates/movie_details.jinja2")
 def movie_detail(request):
-    movie_id = request.matchdict['movie_id']
-    render_dict = dict(request.matchdict, **{'project_name':'I don\'t care'})
+    movie = session.query(Movie).filter(Movie.movie_id == request.matchdict['movie_id']).one()
+    render_dict = dict(request.matchdict, **{'project_name':'I don\'t care', 'movie':movie})
     template_html = render("templates/movie_details.jinja2", render_dict)
     return Response(template_html)
 
