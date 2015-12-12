@@ -1,11 +1,4 @@
 {% extends "base.jinja2" %}
 {% block body %}
-<h1> {{ movie_count }} movies available. </h1>
-Here are some sample
-<table border=1>
-    <tr> <th> Name </th> <th> size </th> <th> file </th> </tr>
-    {% for movie in moveis %}
-    <tr> <td> <a href="/movie/{{movie.movie_id}}">{{ movie.movie_name}} </a> </td> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> <td> {{movie.movie_file}} </td> </tr>
-    {% endfor %}
-</table>
+Under construction
 {% endblock %}

@@ -1,8 +1,16 @@
 <html>
 <head>
 <title> {{ project_name }}</title>
+<script type="text/javascript">
+{% block javascript %}
+{% endblock %}
+</script>
 </head>
 <body>
+{% block header %}
+<div align="right"> {% if current_user %} {{current_user.user_name}} {% endif %} </div>
+<hr>
+{% endblock %}
 {% block body %}
 {% endblock %}
 
