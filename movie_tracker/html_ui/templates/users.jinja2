@@ -1,0 +1,14 @@
+{% extends "base.jinja2" %}
+{% block body %}
+{%for user in users %}
+<input type="button" user_id={{user.user_id}} value="{{user.user_name}}" onclick="selectUser(this)">
+<br>
+{% endfor %}
+{% endblock %}
+
+{% block javascript %}
+function selectUser(element) {
+user_id = element.getAttribute("user_id");
+window.location = "/user/select/"+user_id;
+}
+{% endblock %}
