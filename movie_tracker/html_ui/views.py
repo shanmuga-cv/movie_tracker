@@ -23,3 +23,12 @@ def movie_detail(request):
     render_dict = dict(request.matchdict, **{'project_name':'I don\'t care'})
     template_html = render("templates/movie_details.jinja2", render_dict)
     return Response(template_html)
+
+@view_config(route_name='icon')
+def icon(request):
+    import os
+    file_path  = os.path.dirname(__file__) + '/static/favicon.ico'
+    with open(file_path, 'rb') as fin:
+        response = Response(fin.read())
+        response.content_type  = 'image/x-icon'
+    return response

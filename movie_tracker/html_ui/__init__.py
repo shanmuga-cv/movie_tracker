@@ -9,5 +9,6 @@ def main():
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('movie_details', '/movie/{movie_id}')
+    config.add_route('icon', '/favicon.ico')
     config.scan()
     return config.make_wsgi_app()
