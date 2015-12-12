@@ -1,0 +1,147 @@
+__author__ = 'shanmuga'
+
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship, sessionmaker, scoped_session
+from sqlalchemy import create_engine
+
+from configparser import ConfigParser
+import os
+
+# Why this
+Base = declarative_base()
+
+
+class Movie(Base):
+    __tablename__ = "movies"
+    movie_id = Column(Integer, primary_key=True, autoincrement=True)
+    movie_name = Column(String)
+    movie_file = Column(String)
+    movie_file_size_mb = Column(Integer)
+    subtitle_file = Column(String)
+    status = Column(String)
+    users = relationship("MovieViewings", backref="views") #TODO Learn this syntax
+
+class MovieWatchers(Base):
+    __tablename__ = "movie_watchers"
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_name = Column(String)
+    movies_watched = relationship("MovieViewings", backref="movies") #TODO Learn this syntax
+
+class MovieViewings(Base):
+    __tablename__ = "movie_viewings"
+    movie_viewing_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("movie_watchers.user_id")) #TODO set ondelete
+    movie_id = Column(Integer, ForeignKey("movies.movie_id")) #TODO set ondelete
+    rating = Column(Integer)
+    watched_at = Column(DateTime)  #TODO set default at now
+    user = relationship("MovieWatchers", backref="watcher")
+    movie = relationship("Movie", backref="movie")
+
+
+class ConnectionManager:
+    db_file_path = None
+    engine = None
+    session = None
+
+    @classmethod
+    def inittialize(cls, db_file_path):
+        db_file_path = 'sqlite:///'+db_file_path
+        cls.engine = create_engine(db_file_path, echo=False)
+        cls.session = scoped_session(sessionmaker(bind=cls.engine))
+        Base.metadata.create_all(cls.engine)
+
+
+
+class ConfigManager:
+    @classmethod
+    def initialize(cls):
+        cls.parser = ConfigParser()
+        cls.parser.read("movie_tracker.ini")
+        cls.db_file_path = cls.parser.get("system", "db_file")
+        cls.extensions = cls.parser.get("system", "video_extensions").split(',')
+        cls.monitor_dir = os.path.expandvars( cls.parser.get("system", "monitor_dir") )
+        # validate
+        if not os.path.isdir(cls.monitor_dir):
+            raise ValueError("%s not a directory"%(cls.monitor_dir,))
+        cls.extensions = ['.'+x.lower() for x in cls.extensions]
+
+# Initalize config and ConnectionManager
+ConfigManager.initialize()
+ConnectionManager.inittialize(ConfigManager.db_file_path)
+
+class DirMonitor:
+    @classmethod
+    def scan_directory(cls, monitor_dir, extensions):
+        files_present = set()
+        video_files = None
+        for top, dirs, files in os.walk(monitor_dir):
+            relative_top = top.replace(monitor_dir, '', 1)
+            relative_top = relative_top[1:] if relative_top.startswith('/') else relative_top
+            files_present = files_present.union( set(map(lambda x: os.path.join(relative_top, x), files)) )
+            video_files = list( filter(lambda x: os.path.splitext(x)[1].lower() in extensions, files_present))
+        return video_files
+
+    @classmethod
+    def segregate(cls, video_files_found):
+        existing_movie_files = {x[0] for x in session.query(Movie.movie_file).all()}
+        new_movie_files = set()
+        present_movie_files = set()
+        for video_file in video_files_found:
+            if video_file in existing_movie_files:
+                present_movie_files.add(video_file)
+            else:
+                new_movie_files.add(video_file)
+        missing_movie_files = existing_movie_files.difference(present_movie_files)
+        return new_movie_files, present_movie_files, missing_movie_files
+
+    @classmethod
+    def make_movie(cls, video_file):
+        file_path = os.path.join(ConfigManager.monitor_dir, video_file)
+        file_name = os.path.split(file_path)[1]
+        movie_name = os.path.splitext(file_name)[0]
+        movie_file_size_mb = os.path.getsize(file_path)/(1024.0**2)
+        return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb)
+
+def create_dummy_users():
+    user_lst = []
+    for i in range(10):
+        user_lst.append(MovieWatchers(user_name='user'+str(i)))
+    return user_lst
+
+def create_dummy_movie_viewings(movies, users):
+    from datetime import datetime
+    movie_viewing_lst = []
+    for movie, user in zip(movies, users):
+        movie_viewing_lst.append( MovieViewings(movie_id=movie.movie_id, user_id=user.user_id, rating=1, watched_at=datetime.now()))
+    return movie_viewing_lst
+
+if __name__ == "__main__":
+    session = ConnectionManager.session
+
+    # Add all existing movies
+    video_files_found = DirMonitor.scan_directory(ConfigManager.monitor_dir, ConfigManager.extensions)
+    movies = map(DirMonitor.make_movie, video_files_found)
+    session.add_all(movies)
+    session.commit()
+    # # check for new movies
+    # new_movie_files, present_movie_files, missing_movie_files = DirMonitor.segregate(video_files_found)
+    # print("%d %d %d" % (len(new_movie_files), len(present_movie_files), len(missing_movie_files)) )
+
+    for user in create_dummy_users():
+        session.add(user)
+    session.commit()
+    watchers = session.query(MovieWatchers).limit(4)
+    movies = session.query(Movie).limit(4)
+    movie_viewings = create_dummy_movie_viewings(movies, watchers)
+    for movie_viewing in movie_viewings:
+        session.add(movie_viewing)
+    session.commit()
+
+    viewings = session.query(MovieViewings).all()
+    for movie_viewing in viewings:
+        print(movie_viewing.user.user_name, movie_viewing.movie.movie_name, movie_viewing.movie.movie_file_size_mb, movie_viewing.watched_at, sep='\t')
+
+    movies = session.query(Movie.movie_name, (Movie.movie_file_size_mb+34).label("ab")).filter(Movie.movie_name.like('%0'))
+    for movie in movies:
+        print(movie.movie_name, movie.ab, sep='\t')
