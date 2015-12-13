@@ -133,13 +133,7 @@ if __name__ == "__main__":
     session = ConnectionManager.session
 
     # Add all existing movies
-    video_files_found = DirMonitor.scan_directory(ConfigManager.monitor_dir, ConfigManager.extensions)
-    movies = map(DirMonitor.make_movie, video_files_found)
-    session.add_all(movies)
-    session.commit()
-    # # check for new movies
-    # new_movie_files, present_movie_files, missing_movie_files = DirMonitor.segregate(video_files_found)
-    # print("%d %d %d" % (len(new_movie_files), len(present_movie_files), len(missing_movie_files)) )
+    DirMonitor.populate()
 
     # for user in create_dummy_users():
     #     session.add(user)
