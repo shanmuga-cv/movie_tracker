@@ -116,11 +116,11 @@ class DirMonitor:
         session.commit()
         return len(new_movie_files), len(missing_movie_files)
 
-def create_dummy_users():
-    user_lst = []
-    for i in range(10):
-        user_lst.append(MovieWatchers(user_name='user'+str(i)))
-    return user_lst
+# def create_dummy_users():
+#     user_lst = []
+#     for i in range(10):
+#         user_lst.append(MovieWatchers(user_name='user'+str(i)))
+#     return user_lst
 
 def create_dummy_movie_viewings(movies, users):
     from datetime import datetime
@@ -141,9 +141,9 @@ if __name__ == "__main__":
     # new_movie_files, present_movie_files, missing_movie_files = DirMonitor.segregate(video_files_found)
     # print("%d %d %d" % (len(new_movie_files), len(present_movie_files), len(missing_movie_files)) )
 
-    for user in create_dummy_users():
-        session.add(user)
-    session.commit()
+    # for user in create_dummy_users():
+    #     session.add(user)
+    # session.commit()
     watchers = session.query(MovieWatchers).limit(4)
     movies = session.query(Movie).limit(4)
     movie_viewings = create_dummy_movie_viewings(movies, watchers)
