@@ -89,3 +89,11 @@ def home(request):
     render_dict = get_render_dict(request)
     template_html = render('templates/home.jinja2', render_dict)
     return Response(template_html)
+
+@view_config(route_name="add_user")
+def add_user(request):
+    user_name = request.POST['user_name']
+    user = MovieWatchers(user_name=user_name)
+    session.add(user)
+    session.commit()
+    return Response(status=302, location="/users")
