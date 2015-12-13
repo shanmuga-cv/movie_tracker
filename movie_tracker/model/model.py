@@ -82,6 +82,7 @@ class DirMonitor:
 
     @classmethod
     def segregate(cls, video_files_found):
+        session = ConnectionManager.session
         existing_movie_files = {x[0] for x in session.query(Movie.movie_file).all()}
         new_movie_files = set()
         present_movie_files = set()
@@ -100,6 +101,20 @@ class DirMonitor:
         movie_name = os.path.splitext(file_name)[0]
         movie_file_size_mb = os.path.getsize(file_path)/(1024.0**2)
         return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb)
+
+    @classmethod
+    def populate(cls):
+        session = ConnectionManager.session
+        video_files_found = cls.scan_directory(ConfigManager.monitor_dir, ConfigManager.extensions)
+        new_movie_files, present_movie_files, missing_movie_files = cls.segregate(video_files_found)
+        missing_movies = session.query(Movie).filter(Movie.movie_file.in_(missing_movie_files)).all()
+        new_movies = map(cls.make_movie, new_movie_files)
+        for movie in missing_movies:
+            session.delete(movie)
+        for movie in new_movies:
+            session.add(movie)
+        session.commit()
+        return len(new_movie_files), len(missing_movie_files)
 
 def create_dummy_users():
     user_lst = []

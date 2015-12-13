@@ -2,6 +2,19 @@
 {% block body %}
 <center>
 <a href="users" > select user</a> <br>
-<a href="movies" > all movies </a>
+<a href="movies" > all movies </a> <br>
+<a href="#" onclick="request_scan()"> Refresh Movies </a>
 </center>
+{% endblock %}
+{% block javascript %}
+function request_scan() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if(xhttp.readyState == 4 && xhttp.status == 200){
+            alert(xhttp.responseText);
+        }
+    };
+    xhttp.open("GET", "/scan", true);
+    xhttp.send();
+}
 {% endblock %}

@@ -18,5 +18,8 @@ def main():
     config.add_route('select_user', '/user/select/{user_id}')
 
     config.add_route('mark_watched', '/watched/{user_id}/{movie_id}/{rating}')
+
+    config.add_route('scan', '/scan')
+
     config.scan()
     return config.make_wsgi_app()

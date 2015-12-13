@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.renderers import render
-from ..model.model import ConnectionManager, Movie, MovieWatchers, MovieViewings
+from ..model.model import ConnectionManager, Movie, MovieWatchers, MovieViewings, DirMonitor
 from datetime import datetime
 
 from time import sleep
@@ -12,7 +12,7 @@ def get_render_dict(request):
     current_user = None
     if (request.cookies.get('user_id')):
         current_user_id = request.cookies['user_id']
-        current_user = session.query(MovieWatchers).filter(MovieWatchers.user_id == current_user_id).one()
+        current_user = session.query(MovieWatchers).filter(MovieWatchers.user_id == current_user_id).one_or_none()
     render_dict = dict(global_render_dict, current_user=current_user)
     return render_dict
 
@@ -97,3 +97,10 @@ def add_user(request):
     session.add(user)
     session.commit()
     return Response(status=302, location="/users")
+
+@view_config(route_name="scan")
+def scan(request):
+    print("scanning")
+    total_new_movies_found, total_movies_deleted = DirMonitor.populate()
+    body = "{'total_new_movies_found': %d, 'total_movies_deleted': %d}" % (total_new_movies_found, total_movies_deleted)
+    return Response(body=body, content_type="text/json")
