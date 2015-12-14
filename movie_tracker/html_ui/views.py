@@ -38,7 +38,7 @@ def movie_detail(request):
                                                                 (MovieViewings.user_id == current_user.user_id))\
                                                             .one_or_none()
         previous_rating = previous_viewing.rating if previous_viewing else ""
-    render_dict['previous_rating'] = previous_rating
+        render_dict['previous_rating'] = previous_rating
     render_dict['movie'] = movie
     template_html = render("templates/movie_details.jinja2", render_dict)
     return Response(template_html)
@@ -102,5 +102,5 @@ def add_user(request):
 def scan(request):
     print("scanning")
     total_new_movies_found, total_movies_deleted = DirMonitor.populate()
-    body = "{'total_new_movies_found': %d, 'total_movies_deleted': %d}" % (total_new_movies_found, total_movies_deleted)
+    body = '{"total_new_movies_found": %d, "total_movies_deleted": %d}' % (total_new_movies_found, total_movies_deleted)
     return Response(body=body, content_type="text/json")

@@ -15,7 +15,7 @@ Rating (0-10) <input type=number id=rating min=0 max=10 step=any value="{{previo
 {% if current_user %}
 {% block javascript %}
 function submit_viewing() {
-    rating = document.getElementById("rating").value;
+    rating = $("#rating").val();
     window.location = '/watched/{{ current_user.user_id }}/{{movie.movie_id}}/'+rating;
 }
 {% endblock %}

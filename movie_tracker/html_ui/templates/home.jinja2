@@ -8,13 +8,12 @@
 {% endblock %}
 {% block javascript %}
 function request_scan() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if(xhttp.readyState == 4 && xhttp.status == 200){
-            alert(xhttp.responseText);
+    $.ajax({
+        url: "/scan",
+        type: 'GET',
+        success: function(result){
+            alert(JSON.stringify(result));
         }
-    };
-    xhttp.open("GET", "/scan", true);
-    xhttp.send();
+    });
 }
 {% endblock %}

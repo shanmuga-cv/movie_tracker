@@ -13,7 +13,7 @@
 
 {% block javascript %}
 function selectUser(element) {
-user_id = element.getAttribute("user_id");
-window.location = "/user/select/"+user_id;
+    user_id = $(element).attr("user_id");
+    window.location = "/user/select/"+user_id;
 }
 {% endblock %}
