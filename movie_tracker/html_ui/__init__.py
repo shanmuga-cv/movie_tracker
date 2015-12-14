@@ -21,5 +21,8 @@ def main():
 
     config.add_route('scan', '/scan')
 
+    config.add_route('delete_options', '/delete')
+    config.add_route('delete_watched_by_all', '/delete/watched_by_all')
+
     config.scan()
     return config.make_wsgi_app()

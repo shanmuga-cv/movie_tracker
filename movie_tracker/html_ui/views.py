@@ -104,3 +104,20 @@ def scan(request):
     total_new_movies_found, total_movies_deleted = DirMonitor.populate()
     body = '{"total_new_movies_found": %d, "total_movies_deleted": %d}' % (total_new_movies_found, total_movies_deleted)
     return Response(body=body, content_type="text/json")
+
+@view_config(route_name='delete_options')
+def delete(request):
+    render_dict = get_render_dict(request)
+    return Response(render('/templates/delete.jinja2', render_dict))
+
+@view_config(route_name='delete_watched_by_all')
+def delete_watched_by_all(request):
+    cur = session.execute("select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =2")
+    movie_ids = map(lambda x: x.movie_id, cur)
+    movies = session.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
+    for movie in movies:
+        DirMonitor.delete_movie_file(movie)
+        session.delete(movie)
+    session.commit()
+    message = '{"movies_deleted": %d}'%(len(movies),)
+    return Response(body=message, content_type='text/json')

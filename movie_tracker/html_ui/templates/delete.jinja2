@@ -1,0 +1,17 @@
+{% extends "base.jinja2" %}
+{% block body %}
+<center>
+    <a href="#" onclick="delete_watched_by_all()"> Delete movies seen by all users </a>
+ </center>
+{% endblock %}
+{% block javascript %}
+function delete_watched_by_all() {
+    $.ajax({
+        url:"/delete/watched_by_all",
+        type:'GET',
+        success: function(result) {
+            alert(JSON.stringify(result));
+        }
+    });
+}
+{% endblock %}

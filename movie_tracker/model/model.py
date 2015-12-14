@@ -116,6 +116,11 @@ class DirMonitor:
         session.commit()
         return len(new_movie_files), len(missing_movie_files)
 
+    @classmethod
+    def delete_movie_file(cls, movie):
+        file_path = os.path.join(ConfigManager.monitor_dir, movie.movie_file)
+        os.remove(file_path)
+
 # def create_dummy_users():
 #     user_lst = []
 #     for i in range(10):
