@@ -1,10 +1,27 @@
 {% extends "base.jinja2" %}
 {% block body %}
 <h1> {{ movie_count }} movies available. </h1>
-<table border=1>
+<input type="text" id="search" placeholder="search"> </input>
+<table border=1 id="movie_details">
     <tr> <th> Name </th> <th> size </th> <th> file </th> </tr>
     {% for movie in movies %}
     <tr> <td> <a href="/movie/{{movie.movie_id}}">{{ movie.movie_name}} </a> </td> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> <td> {{movie.movie_file}} </td> </tr>
     {% endfor %}
 </table>
+{% endblock %}
+{% block javascript %}
+$(document).ready(
+    function () {
+        $("#search").keyup(function () {
+            movies = $("#movie_details tr");
+            movies = movies.slice(1); //Remove header row
+            movies.hide();
+            searchStr = $("#search").val().toLowerCase();
+            matching_movies = movies.filter(function (row) {
+                return $(this).text().toLowerCase().indexOf(searchStr) > -1;
+            });
+            matching_movies.show();
+        });
+    }
+);
 {% endblock %}
