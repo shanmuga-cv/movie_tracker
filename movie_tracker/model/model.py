@@ -1,12 +1,13 @@
 __author__ = 'shanmuga'
 
+from configparser import ConfigParser
+import os
+
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy import create_engine
 
-from configparser import ConfigParser
-import os
 
 # Why this
 Base = declarative_base()
@@ -21,18 +22,20 @@ class Movie(Base):
     subtitle_file = Column(String)
     status = Column(String)
 
+
 class MovieWatchers(Base):
     __tablename__ = "movie_watchers"
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(String)
 
+
 class MovieViewings(Base):
     __tablename__ = "movie_viewings"
     movie_viewing_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("movie_watchers.user_id")) #TODO set ondelete
-    movie_id = Column(Integer, ForeignKey("movies.movie_id")) #TODO set ondelete
+    user_id = Column(Integer, ForeignKey("movie_watchers.user_id"))  # TODO set ondelete
+    movie_id = Column(Integer, ForeignKey("movies.movie_id"))  # TODO set ondelete
     rating = Column(Integer)
-    watched_at = Column(DateTime)  #TODO set default at now
+    watched_at = Column(DateTime)  # TODO set default at now
     user = relationship("MovieWatchers", backref="movies_watched")
     movie = relationship("Movie", backref="watched_by")
 
@@ -44,11 +47,10 @@ class ConnectionManager:
 
     @classmethod
     def inittialize(cls, db_file_path):
-        db_file_path = 'sqlite:///'+db_file_path
+        db_file_path = 'sqlite:///' + db_file_path
         cls.engine = create_engine(db_file_path, echo=False)
         cls.session = scoped_session(sessionmaker(bind=cls.engine))
         Base.metadata.create_all(cls.engine)
-
 
 
 class ConfigManager:
@@ -58,15 +60,16 @@ class ConfigManager:
         cls.parser.read("movie_tracker.ini")
         cls.db_file_path = cls.parser.get("system", "db_file")
         cls.extensions = cls.parser.get("system", "video_extensions").split(',')
-        cls.monitor_dir = os.path.expandvars( cls.parser.get("system", "monitor_dir") )
+        cls.monitor_dir = os.path.expandvars(cls.parser.get("system", "monitor_dir"))
         # validate
         if not os.path.isdir(cls.monitor_dir):
-            raise ValueError("%s not a directory"%(cls.monitor_dir,))
-        cls.extensions = ['.'+x.lower() for x in cls.extensions]
+            raise ValueError("%s not a directory" % (cls.monitor_dir,))
+        cls.extensions = ['.' + x.lower() for x in cls.extensions]
 
 # Initalize config and ConnectionManager
 ConfigManager.initialize()
 ConnectionManager.inittialize(ConfigManager.db_file_path)
+
 
 class DirMonitor:
     @classmethod
@@ -76,8 +79,8 @@ class DirMonitor:
         for top, dirs, files in os.walk(monitor_dir):
             relative_top = top.replace(monitor_dir, '', 1)
             relative_top = relative_top[1:] if relative_top.startswith('/') else relative_top
-            files_present = files_present.union( set(map(lambda x: os.path.join(relative_top, x), files)) )
-            video_files = list( filter(lambda x: os.path.splitext(x)[1].lower() in extensions, files_present))
+            files_present = files_present.union(set(map(lambda x: os.path.join(relative_top, x), files)))
+            video_files = list(filter(lambda x: os.path.splitext(x)[1].lower() in extensions, files_present))
         return video_files
 
     @classmethod
@@ -99,7 +102,7 @@ class DirMonitor:
         file_path = os.path.join(ConfigManager.monitor_dir, video_file)
         file_name = os.path.split(file_path)[1]
         movie_name = os.path.splitext(file_name)[0]
-        movie_file_size_mb = os.path.getsize(file_path)/(1024.0**2)
+        movie_file_size_mb = os.path.getsize(file_path) / (1024.0 ** 2)
         return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb)
 
     @classmethod
@@ -121,6 +124,7 @@ class DirMonitor:
         file_path = os.path.join(ConfigManager.monitor_dir, movie.movie_file)
         os.remove(file_path)
 
+
 # def create_dummy_users():
 #     user_lst = []
 #     for i in range(10):
@@ -129,10 +133,13 @@ class DirMonitor:
 
 def create_dummy_movie_viewings(movies, users):
     from datetime import datetime
+
     movie_viewing_lst = []
     for movie, user in zip(movies, users):
-        movie_viewing_lst.append( MovieViewings(movie_id=movie.movie_id, user_id=user.user_id, rating=1, watched_at=datetime.now()))
+        movie_viewing_lst.append(
+            MovieViewings(movie_id=movie.movie_id, user_id=user.user_id, rating=1, watched_at=datetime.now()))
     return movie_viewing_lst
+
 
 if __name__ == "__main__":
     session = ConnectionManager.session
@@ -152,8 +159,10 @@ if __name__ == "__main__":
 
     viewings = session.query(MovieViewings).all()
     for movie_viewing in viewings:
-        print(movie_viewing.user.user_name, movie_viewing.movie.movie_name, movie_viewing.movie.movie_file_size_mb, movie_viewing.watched_at, sep='\t')
+        print(movie_viewing.user.user_name, movie_viewing.movie.movie_name, movie_viewing.movie.movie_file_size_mb,
+              movie_viewing.watched_at, sep='\t')
 
-    movies = session.query(Movie.movie_name, (Movie.movie_file_size_mb+34).label("ab")).filter(Movie.movie_name.like('%0'))
+    movies = session.query(Movie.movie_name, (Movie.movie_file_size_mb + 34).label("ab")).filter(
+        Movie.movie_name.like('%0'))
     for movie in movies:
         print(movie.movie_name, movie.ab, sep='\t')
