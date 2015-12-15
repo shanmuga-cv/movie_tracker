@@ -124,8 +124,9 @@ def delete(request):
 
 @view_config(route_name='delete_watched_by_all')
 def delete_watched_by_all(request):
+    total_users = session.query(MovieWatchers).count()
     cur = session.execute(
-        "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =2")
+        "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =%d"%(total_users,))
     movie_ids = map(lambda x: x.movie_id, cur)
     movies = session.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
     for movie in movies:
