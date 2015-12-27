@@ -2,6 +2,9 @@ import json
 import os
 from datetime import datetime
 
+from urllib import request as url_request
+import shutil
+
 from pyramid.renderers import render
 from pyramid.response import Response, FileResponse
 from pyramid.view import view_config
@@ -33,7 +36,7 @@ def movie_list_page(request):
 def movies_json(request):
     movies = session.query(Movie).all()
     json_list = json.dumps([movie.make_dict() for movie in movies])
-    return Response(body=json_list, content_type="text/json")
+    return Response(body=json_list, content_type="text/json", charset="utf8")
 
 
 @view_config(route_name="movie_details")  # renderer="templates/movie_details.jinja2")
@@ -145,3 +148,39 @@ def delete_watched_by_all(request):
 def get_movie(request):
     movie_file = os.path.join(ConfigManager.monitor_dir, *request.matchdict['movie_file'])
     return FileResponse(path=movie_file)
+
+@view_config(route_name="repo_page")
+def repo_page(request):
+    render_dict = get_render_dict(request)
+    return Response(render("/templates/repo_page.jinja2", render_dict))
+
+@view_config(route_name="list_repo")
+def list_repo(request):
+    hostname = request.POST['hostname']
+    port = request.POST['port']
+    url = 'http://%(hostname)s:%(port)s/movies'%request.POST
+    data = url_request.urlopen(url=url).read().decode("utf-8")
+    data = json.loads(data)
+    my_movie_files = { movie.movie_file for movie in session.query(Movie).all()}
+    missing_movies = list(filter(lambda movie: movie['movie_file'] not in my_movie_files, data))
+    missing_movies = json.dumps(missing_movies)
+    return Response(body=missing_movies)
+
+@view_config(route_name="get_from_repo")
+def get_from_repo(request):
+    monitor_dir = ConfigManager.monitor_dir
+    hostname = request.POST['hostname']
+    port = request.POST['port']
+    missing_movie_files = json.loads(request.POST['missing_movie_files'])
+    for movie_file in missing_movie_files:
+        file_path = os.path.join(monitor_dir, movie_file)
+        dir = os.path.dirname(file_path)
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
+        print('http://'+hostname+':'+port+'/movie/get/'+movie_file)
+        url_stream = url_request.urlopen('http://'+hostname+':'+port+'/movie/get/'+movie_file)
+        fout = open(file_path, 'wb')
+        shutil.copyfileobj(url_stream, fout)
+        url_stream.close()
+        fout.close()
+    return Response(len(missing_movie_files))

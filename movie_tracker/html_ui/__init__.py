@@ -26,5 +26,9 @@ def main():
     config.add_route('delete_options', '/delete')
     config.add_route('delete_watched_by_all', '/delete/watched_by_all')
 
+    config.add_route('repo_page', '/repo/page')
+    config.add_route('list_repo', '/repo/list', request_method='POST')
+    config.add_route('get_from_repo', '/repo/get', request_method='POST')
+
     config.scan()
     return config.make_wsgi_app()
