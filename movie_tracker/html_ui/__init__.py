@@ -10,7 +10,8 @@ def main():
     config.add_route('home', '/')
     config.add_route('icon', '/favicon.ico')
 
-    config.add_route('movie_list', '/movie_list')
+    config.add_route('movie_list', '/show_movie')
+    config.add_route('movie_json', '/movies')
     config.add_route('movie_details', '/movie/{movie_id}')
 
     config.add_route('user_list', '/users')

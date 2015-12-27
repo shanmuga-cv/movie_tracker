@@ -1,17 +1,37 @@
 {% extends "base.jinja2" %}
 {% block body %}
-<h1> {{ movie_count }} movies available. </h1>
+<h1 id="movie_count"> </h1>
 <input type="text" id="search" placeholder="search"> </input>
 <table border=1 id="movie_details">
-    <tr> <th> Name </th> <th> size </th> <th> file </th> </tr>
-    {% for movie in movies %}
-    <tr> <td> <a href="/movie/{{movie.movie_id}}">{{ movie.movie_name}} </a> </td> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> <td> {{movie.movie_file}} </td> </tr>
-    {% endfor %}
 </table>
 {% endblock %}
+
 {% block javascript %}
+function renderMovies(movies) {
+    var htmlContent = "<tr> <th> Name </th> <th> size </th> <th> file </th> </tr> \n";
+    for(var i=0; i<movies.length; ++i) {
+        htmlContent += "<tr>"+
+                        " <td> <a href=\"/movie/" + movies[i].movie_id + "\"> "+ movies[i].movie_name + "</a> </td>" +
+                        " <td align=\"right\"> " + movies[i].movie_file_size_mb.toFixed(2) + "</td> "+
+                        " <td> " + movies[i].movie_file + "</td> " +
+                        " </tr> \n";
+    }
+    $("#movie_details").html(htmlContent);
+}
+
 $(document).ready(
     function () {
+    var  movie_list = null;
+        $.ajax( {
+            url: "/movies",
+            method: 'GET',
+            success: function (data) {
+                movie_list = data;
+                $("#movie_count").text(movie_list.length +" movies available.");
+                renderMovies(movie_list);
+            }
+        });
+
         $("#search").keyup(function () {
             movies = $("#movie_details tr");
             movies = movies.slice(1); //Remove header row

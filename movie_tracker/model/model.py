@@ -1,13 +1,12 @@
 __author__ = 'shanmuga'
 
-from configparser import ConfigParser
 import os
+from configparser import ConfigParser
 
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 from sqlalchemy import create_engine
-
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 
 # Why this
 Base = declarative_base()
@@ -21,6 +20,16 @@ class Movie(Base):
     movie_file_size_mb = Column(Integer)
     subtitle_file = Column(String)
     status = Column(String)
+
+    def make_dict(self):
+        return {
+            "movie_id": self.movie_id,
+            "movie_name": self.movie_name,
+            "movie_file": self.movie_file,
+            "movie_file_size_mb": self.movie_file_size_mb,
+            "subtitle_file": self.subtitle_file,
+            "status": self.status
+        }
 
 
 class MovieWatchers(Base):
@@ -65,6 +74,7 @@ class ConfigManager:
         if not os.path.isdir(cls.monitor_dir):
             raise ValueError("%s not a directory" % (cls.monitor_dir,))
         cls.extensions = ['.' + x.lower() for x in cls.extensions]
+
 
 # Initalize config and ConnectionManager
 ConfigManager.initialize()
@@ -137,7 +147,7 @@ def create_dummy_movie_viewings(movies, users):
     movie_viewing_lst = []
     for movie, user in zip(movies, users):
         movie_viewing_lst.append(
-            MovieViewings(movie_id=movie.movie_id, user_id=user.user_id, rating=1, watched_at=datetime.now()))
+                MovieViewings(movie_id=movie.movie_id, user_id=user.user_id, rating=1, watched_at=datetime.now()))
     return movie_viewing_lst
 
 
@@ -163,6 +173,6 @@ if __name__ == "__main__":
               movie_viewing.watched_at, sep='\t')
 
     movies = session.query(Movie.movie_name, (Movie.movie_file_size_mb + 34).label("ab")).filter(
-        Movie.movie_name.like('%0'))
+            Movie.movie_name.like('%0'))
     for movie in movies:
         print(movie.movie_name, movie.ab, sep='\t')

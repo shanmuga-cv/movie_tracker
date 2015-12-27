@@ -1,12 +1,12 @@
+import json
 import os
 from datetime import datetime
 
-from pyramid.view import view_config
-from pyramid.response import Response
 from pyramid.renderers import render
+from pyramid.response import Response
+from pyramid.view import view_config
 
 from ..model.model import ConnectionManager, Movie, MovieWatchers, MovieViewings, DirMonitor
-
 
 session = ConnectionManager.session
 global_render_dict = {'project_name': 'Movie Tracker'}
@@ -23,14 +23,17 @@ def get_render_dict(request):
 
 # @view_config(route_name='home', renderer='templates/movies.jinja2')
 @view_config(route_name='movie_list')
-def list_movies(request):
+def movie_list_page(request):
     render_dict = get_render_dict(request)
-    movies = session.query(Movie).all()
-    total_movies = session.query(Movie).count()
-    render_dict['movie_count'] = total_movies
-    render_dict['movies'] = movies
     template_html = render('templates/movie_list.jinja2', render_dict)
     return Response(template_html)
+
+
+@view_config(route_name='movie_json')
+def movies_json(request):
+    movies = session.query(Movie).all()
+    json_list = json.dumps([movie.make_dict() for movie in movies])
+    return Response(body=json_list, content_type="text/json")
 
 
 @view_config(route_name="movie_details")  # renderer="templates/movie_details.jinja2")
@@ -126,7 +129,8 @@ def delete(request):
 def delete_watched_by_all(request):
     total_users = session.query(MovieWatchers).count()
     cur = session.execute(
-        "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =%d"%(total_users,))
+            "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =%d" % (
+            total_users,))
     movie_ids = map(lambda x: x.movie_id, cur)
     movies = session.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
     for movie in movies:
