@@ -3,10 +3,10 @@ import os
 from datetime import datetime
 
 from pyramid.renderers import render
-from pyramid.response import Response
+from pyramid.response import Response, FileResponse
 from pyramid.view import view_config
 
-from ..model.model import ConnectionManager, Movie, MovieWatchers, MovieViewings, DirMonitor
+from ..model.model import ConnectionManager, Movie, MovieWatchers, MovieViewings, DirMonitor, ConfigManager
 
 session = ConnectionManager.session
 global_render_dict = {'project_name': 'Movie Tracker'}
@@ -139,3 +139,9 @@ def delete_watched_by_all(request):
     session.commit()
     message = '{"movies_deleted": %d}' % (len(movies),)
     return Response(body=message, content_type='text/json')
+
+
+@view_config(route_name="get_movie_by_file")
+def get_movie(request):
+    movie_file = os.path.join(ConfigManager.monitor_dir, *request.matchdict['movie_file'])
+    return FileResponse(path=movie_file)
