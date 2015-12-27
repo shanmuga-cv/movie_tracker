@@ -29,7 +29,7 @@ def list_movies(request):
     total_movies = session.query(Movie).count()
     render_dict['movie_count'] = total_movies
     render_dict['movies'] = movies
-    template_html = render('templates/movies.jinja2', render_dict)
+    template_html = render('templates/movie_list.jinja2', render_dict)
     return Response(template_html)
 
 
