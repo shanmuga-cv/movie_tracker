@@ -1,9 +1,8 @@
 import json
 import os
-from datetime import datetime
-
-from urllib import request as url_request
 import shutil
+from datetime import datetime
+from urllib import request as url_request
 
 from pyramid.renderers import render
 from pyramid.response import Response, FileResponse
@@ -133,7 +132,7 @@ def delete_watched_by_all(request):
     total_users = session.query(MovieWatchers).count()
     cur = session.execute(
             "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =%d" % (
-            total_users,))
+                total_users,))
     movie_ids = map(lambda x: x.movie_id, cur)
     movies = session.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
     for movie in movies:
@@ -146,29 +145,32 @@ def delete_watched_by_all(request):
 
 @view_config(route_name="get_movie_by_id")
 def get_movie(request):
-    movie = session.query(Movie).filter(Movie.movie_id==request.matchdict['movie_id']).one()
+    movie = session.query(Movie).filter(Movie.movie_id == request.matchdict['movie_id']).one()
     movie_file = os.path.join(ConfigManager.monitor_dir, movie.movie_file)
     file_name = os.path.basename(movie_file)
     response = FileResponse(path=movie_file)
-    response.headerlist={'Content-disposition': 'attachment; filename=\"%s\"'%(file_name)}
+    response.headerlist = {'Content-disposition': 'attachment; filename=\"%s\"' % (file_name)}
     return response
+
 
 @view_config(route_name="repo_page")
 def repo_page(request):
     render_dict = get_render_dict(request)
     return Response(render("/templates/repo_page.jinja2", render_dict))
 
+
 @view_config(route_name="list_repo")
 def list_repo(request):
     hostname = request.POST['hostname']
     port = request.POST['port']
-    url = 'http://%(hostname)s:%(port)s/movies'%request.POST
+    url = 'http://%(hostname)s:%(port)s/movies' % request.POST
     data = url_request.urlopen(url=url).read().decode("utf-8")
     data = json.loads(data)
-    my_movie_files = { movie.movie_file for movie in session.query(Movie).all()}
+    my_movie_files = {movie.movie_file for movie in session.query(Movie).all()}
     missing_movies = list(filter(lambda movie: movie['movie_file'] not in my_movie_files, data))
     missing_movies = json.dumps(missing_movies)
     return Response(body=missing_movies)
+
 
 @view_config(route_name="get_from_repo")
 def get_from_repo(request):
@@ -181,7 +183,7 @@ def get_from_repo(request):
         dir = os.path.dirname(file_path)
         if not os.path.isdir(dir):
             os.makedirs(dir)
-        url_stream = url_request.urlopen('http://%s:%s/movie/get/%d'%(hostname, port, movie['movie_id']))
+        url_stream = url_request.urlopen('http://%s:%s/movie/get/%d' % (hostname, port, movie['movie_id']))
         fout = open(file_path, 'wb')
         shutil.copyfileobj(url_stream, fout)
         url_stream.close()

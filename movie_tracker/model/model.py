@@ -117,7 +117,8 @@ class DirMonitor:
         movie_name = os.path.splitext(file_name)[0]
         movie_file_size_mb = os.path.getsize(file_path) / (1024.0 ** 2)
         date_added = datetime.now()
-        return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb, date_added=date_added)
+        return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb,
+                     date_added=date_added)
 
     @classmethod
     def populate(cls):
