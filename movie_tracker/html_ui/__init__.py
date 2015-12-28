@@ -12,8 +12,8 @@ def main():
 
     config.add_route('movie_list', '/show_movie')
     config.add_route('movie_json', '/movies')
+    config.add_route('get_movie_by_id', '/movie/get/{movie_id}', request_method='GET')
     config.add_route('movie_details', '/movie/{movie_id}')
-    config.add_route('get_movie_by_file', '/movie/get/*movie_file')
 
     config.add_route('user_list', '/users')
     config.add_route('add_user', '/users/add', request_method='POST')

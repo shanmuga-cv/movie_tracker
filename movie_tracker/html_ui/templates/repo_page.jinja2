@@ -11,7 +11,7 @@
 function renderMissing(movies) {
     var htmlContent = "<tr> <th> select </th> <th> Movie Name</th> <th> size </th> <th> Movie File</th> </tr> \n";
     for(var i=0; i<movies.length; ++i) {
-        htmlContent += "<tr> <td> <input type='checkbox' value='"+movies[i].movie_file+
+        htmlContent += "<tr> <td> <input type='checkbox' value='"+movies[i].movie_id+
         "' class='missing_movie'> </input> </td> <td> "+movies[i].movie_name+ " </td><td> "+movies[i].movie_file_size_mb+" </td><td> "+movies[i].movie_file+"</td> </tr> \n";
     }
     $("#missing").html(htmlContent);
@@ -23,6 +23,8 @@ $(document).ready(function() {
         $("#missing").hide();
         $("#get_missing").hide();
 
+        repoMovies = null;
+
         $("#listBtn").click(function() {
             $.ajax({
                 url: "/repo/list",
@@ -32,7 +34,8 @@ $(document).ready(function() {
                     port: $("#port").val()
                 },
                 success: function (data) {
-                    renderMissing(JSON.parse(data));
+                    repoMovies = JSON.parse(data)
+                    renderMissing(repoMovies);
                 }
             });
         });
@@ -40,23 +43,27 @@ $(document).ready(function() {
         $("#get_missing").click(function () {
             console.log("doing");
             var selectedElements = $(".missing_movie:checked");
-            var selectMovies = [];
+            var selectMovieIds = [];
             for(var i=0; i<selectedElements.length; ++i) {
-                selectMovies[i] = selectedElements[i].value;
+                selectMovieIds[i] = selectedElements[i].value;
             }
-            selectMovies = JSON.stringify(selectMovies);
-            $.ajax({
-                url: "/repo/get",
-                method: "POST",
-                data: {
-                    hostname: $("#hostname").val(),
-                    port: $("#port").val(),
-                    missing_movie_files: selectMovies
-                },
-                success: function(data) {
-                    alert(data);
-                }
+            selectMovies = repoMovies.filter(function (movie) {
+                return selectMovieIds.indexOf(movie.movie_id.toString()) > -1;
             });
+            selectMovies = JSON.stringify(selectMovies);
+            console.log(selectMovies);
+            $.ajax({
+                            url: "/repo/get",
+                            method: "POST",
+                            data: {
+                                hostname: $("#hostname").val(),
+                                port: $("#port").val(),
+                                missing_movies: selectMovies
+                            },
+                            success: function(data) {
+                                alert(data);
+                            }
+                        });
 
         });
 });

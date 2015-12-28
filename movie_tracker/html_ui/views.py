@@ -144,9 +144,10 @@ def delete_watched_by_all(request):
     return Response(body=message, content_type='text/json')
 
 
-@view_config(route_name="get_movie_by_file")
+@view_config(route_name="get_movie_by_id")
 def get_movie(request):
-    movie_file = os.path.join(ConfigManager.monitor_dir, *request.matchdict['movie_file'])
+    movie = session.query(Movie).filter(Movie.movie_id==request.matchdict['movie_id']).one()
+    movie_file = os.path.join(ConfigManager.monitor_dir, movie.movie_file)
     return FileResponse(path=movie_file)
 
 @view_config(route_name="repo_page")
@@ -171,16 +172,15 @@ def get_from_repo(request):
     monitor_dir = ConfigManager.monitor_dir
     hostname = request.POST['hostname']
     port = request.POST['port']
-    missing_movie_files = json.loads(request.POST['missing_movie_files'])
-    for movie_file in missing_movie_files:
-        file_path = os.path.join(monitor_dir, movie_file)
+    missing_movies = json.loads(request.POST['missing_movies'])
+    for movie in missing_movies:
+        file_path = os.path.join(monitor_dir, movie['movie_file'])
         dir = os.path.dirname(file_path)
         if not os.path.isdir(dir):
             os.makedirs(dir)
-        print('http://'+hostname+':'+port+'/movie/get/'+movie_file)
-        url_stream = url_request.urlopen('http://'+hostname+':'+port+'/movie/get/'+movie_file)
+        url_stream = url_request.urlopen('http://%s:%s/movie/get/%d'%(hostname, port, movie['movie_id']))
         fout = open(file_path, 'wb')
         shutil.copyfileobj(url_stream, fout)
         url_stream.close()
         fout.close()
-    return Response(len(missing_movie_files))
+    return Response(str(len(missing_movies)))
