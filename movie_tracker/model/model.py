@@ -2,6 +2,7 @@ __author__ = 'shanmuga'
 
 import os
 from configparser import ConfigParser
+from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy import create_engine
@@ -20,6 +21,7 @@ class Movie(Base):
     movie_file_size_mb = Column(Integer)
     subtitle_file = Column(String)
     status = Column(String)
+    date_added = Column(DateTime)
 
     def make_dict(self):
         return {
@@ -28,7 +30,8 @@ class Movie(Base):
             "movie_file": self.movie_file,
             "movie_file_size_mb": self.movie_file_size_mb,
             "subtitle_file": self.subtitle_file,
-            "status": self.status
+            "status": self.status,
+            'date_added': self.date_added.strftime("%Y-%m-%d")
         }
 
 
@@ -113,7 +116,8 @@ class DirMonitor:
         file_name = os.path.split(file_path)[1]
         movie_name = os.path.splitext(file_name)[0]
         movie_file_size_mb = os.path.getsize(file_path) / (1024.0 ** 2)
-        return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb)
+        date_added = datetime.now()
+        return Movie(movie_name=movie_name, movie_file=video_file, movie_file_size_mb=movie_file_size_mb, date_added=date_added)
 
     @classmethod
     def populate(cls):

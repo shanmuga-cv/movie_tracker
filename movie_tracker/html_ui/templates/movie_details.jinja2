@@ -9,6 +9,7 @@ Rating (0-10) <input type=number id=rating min=0 max=10 step=any value="{{previo
     <tr> <th> name </th> <td> <input type="text" value="{{ movie.movie_name}}"> </text> </td> </tr>
     <tr> <th> size (MB) </th> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> </tr>
     <tr> <th> file </th> <td> {{ movie.movie_file}} </td> </tr>
+    <tr> <th> date_added </th> <td> {{ movie.date_added}} </td> </tr>
 </table>
 {% endblock %}
 
