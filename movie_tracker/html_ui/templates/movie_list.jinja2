@@ -55,6 +55,10 @@ $(document).ready(
                 rows.sort(function (a, b) {
                     var a_val = $(a).children("td").eq(column_idx).text();
                     var b_val = $(b).children("td").eq(column_idx).text();
+
+                    a_val = a_val == parseFloat(a_val)? parseFloat(a_val): a_val; // Handle numeric values
+                    b_val = b_val == parseFloat(b_val)? parseFloat(b_val): b_val;
+
                     return (a_val<b_val)?-1:(a_val>b_val?1:0);
                 });
                 if(!this.ascending) rows = rows.get().reverse();
