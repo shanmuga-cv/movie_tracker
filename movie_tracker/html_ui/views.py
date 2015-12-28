@@ -183,4 +183,4 @@ def get_from_repo(request):
         shutil.copyfileobj(url_stream, fout)
         url_stream.close()
         fout.close()
-    return Response(str(len(missing_movies)))
+    return scan(request)
