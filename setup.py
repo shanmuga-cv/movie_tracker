@@ -9,6 +9,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
+    'sqlalchemy',
     'pyramid',
     'jinja2',
     'pyramid_jinja2'
