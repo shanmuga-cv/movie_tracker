@@ -5,7 +5,7 @@ Rating (0-10) <input type=number id=rating min=0 max=10 step=any value="{{previo
 <br><br>
 {% endif %}
 <table border=1>
-    <tr> <th> id </th> <td> {{ movie.movie_id}} </td> </tr>
+    <tr> <th> id </th> <td> <a href="/movie/get/{{movie.movie_id}}">{{ movie.movie_id}} </a> </td> </tr>
     <tr> <th> name </th> <td> <input type="text" value="{{ movie.movie_name}}"> </text> </td> </tr>
     <tr> <th> size (MB) </th> <td> {{ "%.2f"%movie.movie_file_size_mb}} </td> </tr>
     <tr> <th> file </th> <td> {{ movie.movie_file}} </td> </tr>

@@ -148,7 +148,10 @@ def delete_watched_by_all(request):
 def get_movie(request):
     movie = session.query(Movie).filter(Movie.movie_id==request.matchdict['movie_id']).one()
     movie_file = os.path.join(ConfigManager.monitor_dir, movie.movie_file)
-    return FileResponse(path=movie_file)
+    file_name = os.path.basename(movie_file)
+    response = FileResponse(path=movie_file)
+    response.headerlist={'Content-disposition': 'attachment; filename=\"%s\"'%(file_name)}
+    return response
 
 @view_config(route_name="repo_page")
 def repo_page(request):
