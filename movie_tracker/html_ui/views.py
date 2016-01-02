@@ -94,7 +94,7 @@ def mark_watched(request):
         viewing = MovieViewings(movie_id=movie_id, user_id=user_id, rating=rating, watched_at=datetime.now())
         session.add(viewing)
     session.commit()
-    response = Response(status=302, location="/movies")
+    response = Response(status=302, location=request.route_url('movie_list'))
     return response
 
 
