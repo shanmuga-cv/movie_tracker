@@ -127,6 +127,7 @@ def delete(request):
     render_dict = get_render_dict(request)
     return Response(render('/templates/delete.jinja2', render_dict))
 
+
 @view_config(route_name="delete_movies")
 def delete_movies(request):
     print(request.POST)
@@ -141,13 +142,15 @@ def delete_movies(request):
     message = '{"movies_deleted": %d}' % (len(movies),)
     return Response(body=message, content_type='text/json')
 
+
 @view_config(route_name='movies_watched_by_all')
 def movies_seen_by_all(request):
     total_users = session.query(MovieWatchers).count()
     movies_ids_seen_by_all = session.query(MovieViewings.movie_id).group_by(MovieViewings.movie_id).having(
-        func.count(distinct(MovieViewings.user_id)) == total_users)
+            func.count(distinct(MovieViewings.user_id)) == total_users)
     movies_seen_by_all = session.query(Movie).filter(Movie.movie_id.in_(movies_ids_seen_by_all)).all()
     return Response(json.dumps([movie.make_dict() for movie in movies_seen_by_all]), content_type='text/json')
+
 
 @view_config(route_name="get_movie_by_id")
 def get_movie(request):

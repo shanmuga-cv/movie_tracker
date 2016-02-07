@@ -12,7 +12,7 @@ def main():
 
     config.add_route('movie_list', '/show_movie')
     config.add_route('movie_json', '/movies')
-    config.add_route('movies_watched_by_all', '/movies/watcched_by_all')
+    config.add_route('movies_watched_by_all', '/movies/watched_by_all')
     config.add_route('get_movie_by_id', '/movie/get/{movie_id}', request_method='GET')
     config.add_route('movie_details', '/movie/{movie_id}')
 

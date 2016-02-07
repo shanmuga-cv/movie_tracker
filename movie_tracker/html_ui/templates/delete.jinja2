@@ -12,7 +12,7 @@
 {% block javascript %}
 function movies_watched_by_all() {
     $.ajax({
-        url:"/movies/seen_by_all",
+        url:"/movies/watched_by_all",
         type:'GET',
         success: function(result) {
             renderMovies(result, true);
