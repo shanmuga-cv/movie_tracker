@@ -1,7 +1,8 @@
 {% extends "base.jinja2" %}
 {% block body %}
 <center>
-    <a href="#" onclick="movies_watched_by_all()"> Delete movies seen by all users </a>
+    <a href="#" onclick="movies_watched_by_all()"> Delete movies seen by all users </a> <br>
+    <a href="#" onclick="movies_watched_by_me()"> Delete movies watched by me </a>
  </center>
  <br>
  <hr>
@@ -21,6 +22,16 @@ function movies_watched_by_all() {
     });
 }
 
+function movies_watched_by_me() {
+    $.ajax({
+            url:"/movies/watched_by_me",
+            type:'GET',
+            success: function(result) {
+                renderMovies(result, true);
+                $("#delete_btn").show();
+            }
+        });
+}
 $(document).ready(function () {
     $("#delete_btn").hide();
     $("#delete_btn").click(function () {

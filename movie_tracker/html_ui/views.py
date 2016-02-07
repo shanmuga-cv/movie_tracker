@@ -151,6 +151,12 @@ def movies_seen_by_all(request):
     movies_seen_by_all = session.query(Movie).filter(Movie.movie_id.in_(movies_ids_seen_by_all)).all()
     return Response(json.dumps([movie.make_dict() for movie in movies_seen_by_all]), content_type='text/json')
 
+@view_config(route_name='movies_watched_by_me')
+def movies_watched_by_me(request):
+    current_user_id = request.cookies['user_id']
+    my_movie_ids = session.query(MovieViewings.movie_id).filter(MovieViewings.user_id==current_user_id)
+    my_movies = session.query(Movie).filter(Movie.movie_id.in_(my_movie_ids)).all()
+    return Response(json.dumps([movie.make_dict() for movie in my_movies]), content_type='text/json')
 
 @view_config(route_name="get_movie_by_id")
 def get_movie(request):
