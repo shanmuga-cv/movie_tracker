@@ -3,22 +3,11 @@
 <input type="text" id="hostname" placeholder="hostname"> </input>
 <input type="text" id="port" placeholder="port"> </input>
 <button id="listBtn"> List </button>
-<table id="missing" border=1> </table>
+<table id="movie_details" border=1> </table>
 <button id="get_missing"> get missing </button>
 {% endblock %}
 
 {% block javascript %}
-function renderMissing(movies) {
-    var htmlContent = "<tr> <th> select </th> <th> Movie Name</th> <th> size </th> <th> Movie File</th> </tr> \n";
-    for(var i=0; i<movies.length; ++i) {
-        htmlContent += "<tr> <td> <input type='checkbox' value='"+movies[i].movie_id+
-        "' class='missing_movie'> </input> </td> <td> "+movies[i].movie_name+ " </td><td> "+movies[i].movie_file_size_mb+" </td><td> "+movies[i].movie_file+"</td> </tr> \n";
-    }
-    $("#missing").html(htmlContent);
-    $("#missing").show();
-    $("#get_missing").show();
-}
-
 $(document).ready(function() {
         $("#missing").hide();
         $("#get_missing").hide();
@@ -34,19 +23,17 @@ $(document).ready(function() {
                     port: $("#port").val()
                 },
                 success: function (data) {
-                    repoMovies = JSON.parse(data)
-                    renderMissing(repoMovies);
+                    repoMovies = JSON.parse(data);
+                    renderMovies(repoMovies, true);
+                    $("#get_missing").show();
                 }
             });
         });
 
         $("#get_missing").click(function () {
             console.log("doing");
-            var selectedElements = $(".missing_movie:checked");
-            var selectMovieIds = [];
-            for(var i=0; i<selectedElements.length; ++i) {
-                selectMovieIds[i] = selectedElements[i].value;
-            }
+            var selectMovieIds = getSelectedMovieIds();
+
             selectMovies = repoMovies.filter(function (movie) {
                 return selectMovieIds.indexOf(movie.movie_id.toString()) > -1;
             });
