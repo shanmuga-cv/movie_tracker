@@ -12,7 +12,7 @@ def main():
 
     config.add_route('movie_list', '/show_movie')
     config.add_route('movie_json', '/movies')
-    config.add_route('movies_seen_by_all', '/movies/seen_by_all')
+    config.add_route('movies_watched_by_all', '/movies/watcched_by_all')
     config.add_route('get_movie_by_id', '/movie/get/{movie_id}', request_method='GET')
     config.add_route('movie_details', '/movie/{movie_id}')
 
@@ -25,7 +25,7 @@ def main():
     config.add_route('scan', '/scan')
 
     config.add_route('delete_options', '/delete')
-    config.add_route('delete_watched_by_all', '/delete/watched_by_all')
+    config.add_route('delete_movies', '/delete_movies', request_method='POST')
 
     config.add_route('repo_page', '/repo/page')
     config.add_route('list_repo', '/repo/list', request_method='POST')

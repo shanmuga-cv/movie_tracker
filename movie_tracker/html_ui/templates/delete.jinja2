@@ -1,17 +1,41 @@
 {% extends "base.jinja2" %}
 {% block body %}
 <center>
-    <a href="#" onclick="delete_watched_by_all()"> Delete movies seen by all users </a>
+    <a href="#" onclick="movies_watched_by_all()"> Delete movies seen by all users </a>
  </center>
+ <br>
+ <hr>
+ <table border=1 id="movie_details">
+ </table>
+ <button id="delete_btn"> Delete </button>
 {% endblock %}
 {% block javascript %}
-function delete_watched_by_all() {
+function movies_watched_by_all() {
     $.ajax({
-        url:"/delete/watched_by_all",
+        url:"/movies/seen_by_all",
         type:'GET',
         success: function(result) {
-            alert(JSON.stringify(result));
+            renderMovies(result, true);
+            $("#delete_btn").show();
         }
     });
 }
+
+$(document).ready(function () {
+    $("#delete_btn").hide();
+    $("#delete_btn").click(function () {
+        selectedMoviesIds = getSelectedMovieIds();
+        $.ajax({
+            url:"delete_movies",
+            type:'POST',
+            data: {
+                movie_ids_to_delete: JSON.stringify(selectedMoviesIds)
+            },
+            success: function(result) {
+                alert( JSON.stringify(result) );
+                movies_watched_by_all();
+            }
+        });
+    });
+});
 {% endblock %}

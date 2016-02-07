@@ -127,23 +127,12 @@ def delete(request):
     render_dict = get_render_dict(request)
     return Response(render('/templates/delete.jinja2', render_dict))
 
-
-@view_config(route_name='movies_seen_by_all')
-def movies_seen_by_all(request):
-    total_users = session.query(MovieWatchers).count()
-    movies_ids_seen_by_all = session.query(MovieViewings.movie_id).group_by(MovieViewings.movie_id).having(
-        func.count(distinct(MovieViewings.user_id)) == total_users)
-    movies_seen_by_all = session.query(Movie).filter(Movie.movie_id.in_(movies_ids_seen_by_all)).all()
-    return Response(json.dumps([movie.make_dict() for movie in movies_seen_by_all]))
-
-
-@view_config(route_name='delete_watched_by_all')
-def delete_watched_by_all(request):
-    total_users = session.query(MovieWatchers).count()
-    cur = session.execute(
-            "select movie_id from (select movie_id, count(distinct(user_id)) cnt_users from movie_viewings group by movie_id ) where cnt_users =%d" % (
-                total_users,))
-    movie_ids = map(lambda x: x.movie_id, cur)
+@view_config(route_name="delete_movies")
+def delete_movies(request):
+    print(request.POST)
+    movie_ids_to_delete = request.POST['movie_ids_to_delete']
+    movie_ids_str = json.loads(movie_ids_to_delete)
+    movie_ids = [int(id_str) for id_str in movie_ids_str]
     movies = session.query(Movie).filter(Movie.movie_id.in_(movie_ids)).all()
     for movie in movies:
         DirMonitor.delete_movie_file(movie)
@@ -152,6 +141,13 @@ def delete_watched_by_all(request):
     message = '{"movies_deleted": %d}' % (len(movies),)
     return Response(body=message, content_type='text/json')
 
+@view_config(route_name='movies_watched_by_all')
+def movies_seen_by_all(request):
+    total_users = session.query(MovieWatchers).count()
+    movies_ids_seen_by_all = session.query(MovieViewings.movie_id).group_by(MovieViewings.movie_id).having(
+        func.count(distinct(MovieViewings.user_id)) == total_users)
+    movies_seen_by_all = session.query(Movie).filter(Movie.movie_id.in_(movies_ids_seen_by_all)).all()
+    return Response(json.dumps([movie.make_dict() for movie in movies_seen_by_all]), content_type='text/json')
 
 @view_config(route_name="get_movie_by_id")
 def get_movie(request):
