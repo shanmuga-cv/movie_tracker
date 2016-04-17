@@ -130,7 +130,6 @@ def delete(request):
 
 @view_config(route_name="delete_movies")
 def delete_movies(request):
-    print(request.POST)
     movie_ids_to_delete = request.POST['movie_ids_to_delete']
     movie_ids_str = json.loads(movie_ids_to_delete)
     movie_ids = [int(id_str) for id_str in movie_ids_str]

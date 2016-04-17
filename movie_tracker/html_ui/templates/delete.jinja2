@@ -2,7 +2,8 @@
 {% block body %}
 <center>
     <a href="#" onclick="movies_watched_by_all()"> Delete movies seen by all users </a> <br>
-    <a href="#" onclick="movies_watched_by_me()"> Delete movies watched by me </a>
+    <a href="#" onclick="movies_watched_by_me()"> Delete movies watched by me </a> <br>
+    <a href="#" onclick="all_movies()"> Select from list </a>
  </center>
  <br>
  <hr>
@@ -31,6 +32,17 @@ function movies_watched_by_me() {
                 $("#delete_btn").show();
             }
         });
+}
+
+function all_movies() {
+    $.ajax({
+        url:"/movies",
+        type:"GET",
+        success: function(result) {
+            renderMovies(result, true);
+            $("#delete_btn").show();
+        }
+    })
 }
 $(document).ready(function () {
     $("#delete_btn").hide();
