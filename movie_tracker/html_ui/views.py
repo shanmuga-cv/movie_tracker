@@ -202,7 +202,8 @@ def list_repo(request):
     repo_separator = data['dir_separator']
     current_separator = os.path.sep
     if repo_separator != current_separator:
-        movies_from_repo = map(lambda x: x['movie_file'].replace(repo_separator, current_separator),movies_from_repo)
+        for movie in movies_from_repo:
+            movie['movie_file'] = movie['movie_file'].replace(repo_separator, current_separator)
     my_movie_files = {movie.movie_file for movie in session.query(Movie).all()}
     missing_movies = list(filter(lambda movie: movie['movie_file'] not in my_movie_files, movies_from_repo))
     missing_movies = json.dumps(missing_movies)
