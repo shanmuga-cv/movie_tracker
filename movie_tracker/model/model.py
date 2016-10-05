@@ -91,7 +91,7 @@ class DirMonitor:
         video_files = None
         for top, dirs, files in os.walk(monitor_dir):
             relative_top = top.replace(monitor_dir, '', 1)
-            relative_top = relative_top[1:] if relative_top.startswith('/') else relative_top
+            relative_top = relative_top[1:] if os.path.sep else relative_top
             files_present = files_present.union(set(map(lambda x: os.path.join(relative_top, x), files)))
             video_files = list(filter(lambda x: os.path.splitext(x)[1].lower() in extensions, files_present))
         return video_files
