@@ -17,7 +17,7 @@ function movies_watched_by_all() {
         url:"/movies/watched_by_all",
         type:'GET',
         success: function(result) {
-            renderMovies(result, true);
+            renderMovies(result.movies, true);
             $("#delete_btn").show();
         }
     });
@@ -28,7 +28,7 @@ function movies_watched_by_me() {
             url:"/movies/watched_by_me",
             type:'GET',
             success: function(result) {
-                renderMovies(result, true);
+                renderMovies(result.movies, true);
                 $("#delete_btn").show();
             }
         });
@@ -39,7 +39,7 @@ function all_movies() {
         url:"/movies",
         type:"GET",
         success: function(result) {
-            renderMovies(result, true);
+            renderMovies(result.movies, true);
             $("#delete_btn").show();
         }
     })

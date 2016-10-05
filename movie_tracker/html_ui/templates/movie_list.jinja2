@@ -15,7 +15,7 @@ $(document).ready(
             url: "/movies",
             method: 'GET',
             success: function (data) {
-                movie_list = data;
+                movie_list = data.movies;
                 $("#movie_count").text(movie_list.length +" movies available.");
                 renderMovies(movie_list);
             }

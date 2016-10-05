@@ -35,8 +35,12 @@ def movie_list_page(request):
 @view_config(route_name='movie_json')
 def movies_json(request):
     movies = session.query(Movie).all()
-    json_list = json.dumps([movie.make_dict() for movie in movies])
-    return Response(body=json_list, content_type="text/json", charset="utf8")
+    movie_list = [movie.make_dict() for movie in movies]
+    json_obj = {
+        'dir_separator': os.path.sep,
+        'movies': movie_list
+    }
+    return Response(body=json.dumps(json_obj), content_type="text/json", charset="utf8")
 
 
 @view_config(route_name="movie_details")  # renderer="templates/movie_details.jinja2")
@@ -148,14 +152,24 @@ def movies_seen_by_all(request):
     movies_ids_seen_by_all = session.query(MovieViewings.movie_id).group_by(MovieViewings.movie_id).having(
             func.count(distinct(MovieViewings.user_id)) == total_users)
     movies_seen_by_all = session.query(Movie).filter(Movie.movie_id.in_(movies_ids_seen_by_all)).all()
-    return Response(json.dumps([movie.make_dict() for movie in movies_seen_by_all]), content_type='text/json')
+    movie_list = [movie.make_dict() for movie in movies_seen_by_all]
+    result_obj = {
+        'dir_separator': os.path.sep,
+        'movies': movie_list
+    }
+    return Response(json.dumps(result_obj), content_type='text/json')
 
 @view_config(route_name='movies_watched_by_me')
 def movies_watched_by_me(request):
     current_user_id = request.cookies['user_id']
     my_movie_ids = session.query(MovieViewings.movie_id).filter(MovieViewings.user_id==current_user_id)
     my_movies = session.query(Movie).filter(Movie.movie_id.in_(my_movie_ids)).all()
-    return Response(json.dumps([movie.make_dict() for movie in my_movies]), content_type='text/json')
+    movie_list = [movie.make_dict() for movie in my_movies]
+    result_obj = {
+        'dir_separator': os.path.sep,
+        'movies': movie_list
+    }
+    return Response(json.dumps(result_obj), content_type='text/json')
 
 @view_config(route_name="get_movie_by_id")
 def get_movie(request):
@@ -175,13 +189,22 @@ def repo_page(request):
 
 @view_config(route_name="list_repo")
 def list_repo(request):
-    hostname = request.POST['hostname']
-    port = request.POST['port']
     url = 'http://%(hostname)s:%(port)s/movies' % request.POST
     data = url_request.urlopen(url=url).read().decode("utf-8")
+    # expect data json structure to be
+    #   { 'dir_separator': '/',
+    #     'movies': [{"movie_name": "some_movie", "status": null, "movie_id": 1,
+    #               "movie_file_size_mb": 1004.9942789077759, "subtitle_file": null, "movie_file": "parent_dir/some_movie.mp4",
+    #               "date_added": "2016-08-13"}]
+    #   }
     data = json.loads(data)
+    movies_from_repo = data['movies']
+    repo_separator = data['dir_separator']
+    current_separator = os.path.sep
+    if repo_separator != current_separator:
+        movies_from_repo = map(lambda x: x['movie_file'].replace(repo_separator, current_separator),movies_from_repo)
     my_movie_files = {movie.movie_file for movie in session.query(Movie).all()}
-    missing_movies = list(filter(lambda movie: movie['movie_file'] not in my_movie_files, data))
+    missing_movies = list(filter(lambda movie: movie['movie_file'] not in my_movie_files, movies_from_repo))
     missing_movies = json.dumps(missing_movies)
     return Response(body=missing_movies)
 
